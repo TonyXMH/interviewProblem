@@ -6,17 +6,17 @@ using namespace std;
 class Pet
 {
     private:
-        string type;
+        string m_type;          //给成员数据添加前缀
     public:
         Pet(){}
         
-        Pet(string type)
+        Pet(const string & type)    //给构造函数传参修改了一点
         {
-            this->type = type;
+            m_type = type;
         }
         string getPetType()
         {
-            return this->type;
+            return m_type;
         }
         //需要添加=的重载
        /* Pet & operator=(const Pet& pet) const
@@ -40,45 +40,51 @@ class Cat : public Pet
 class PetEnterQueue
 {
     private:
-        Pet pet;        //父类成员
-        long count;     //时间戳
+        Pet m_pet;        //父类成员
+        long m_count;     //时间戳
     public:
-        PetEnterQueue(Pet pet, long count)
+        PetEnterQueue( const Pet & pet, long count)
         {   //这里需要重载运算符=？
-            this->pet = pet;
-            this->count = count;
+            m_pet = pet;
+            m_count = count;
         }
         Pet getPet()
         {
-            return this->pet;
+            return m_pet;
         }
         long getCount()
         {
-            return this->count;
+            return m_count;
         }
        // public string getEnterPetType()自己想什么这是c++
         string getEnterPetType()
         {
-            return this->pet.getPetType();
+            return m_pet.getPetType();
         }
     
 };
 class DogCatQueue
 {
     private:
-        queue<PetEnterQueue> dogQ;
-        queue<PetEnterQueue> catQ;
-        long count;
+        queue<PetEnterQueue> m_dogQ;
+        queue<PetEnterQueue> m_catQ;
+        long m_count;
     public:
-        DogCatQueue():count(0){}
+        DogCatQueue():m_count(0){}
         
         //让pet实例入队
-        void push(Pet pet)
+        void push(Pet & pet)
         {
             if(pet.getPetType() == "dog")
-                this->dogQ.push(new PetEnterQueue(pet, this->count++));
+            {
+                PetEnterQueue dogQ(pet, m_count++);
+                m_dogQ.push(dogQ);
+            }
             else if(pet.getPetType() == "cat")
-                this->catQ.push(new PetEnterQueue(pet, this->count++));
+            {
+                PetEnterQueue catQ(pet, m_count++);
+                m_catQ.push(catQ);
+            }
             else
                 return ;        //最好是抛出异常
 
@@ -86,81 +92,84 @@ class DogCatQueue
         //让cat或dog类的实例按照入队的次序出队
         void popAll()
         {
-           if(!this->dogQ.empty() && !this->catQ.empty())
+           if(!m_dogQ.empty() && !m_catQ.empty())
            {//时间戳小的先进队列
-               if(this->dogQ.front().getCount() < this->catQ.front().getCount())
-                   this->dogQ.pop();
+               if(m_dogQ.front().getCount() < m_catQ.front().getCount())
+                   m_dogQ.pop();
                else
-                   this->catQ.pop();
+                   m_catQ.pop();
            }//下面的两个条件是对上面条件的补充
-           else if(!this->dogQ.empty())
-               this->dogQ.pop();
-           else if(!this->catQ.empty())
-               this->catQ.pop();
+           else if(!m_dogQ.empty())
+               m_dogQ.pop();
+           else if(!m_catQ.empty())
+               m_catQ.pop();
            else
                return;      //异常
         }
         //获取队首元素
         Pet frontAll()
         {
-           if(!this->dogQ.empty() && !this->catQ.empty())
+           if(!m_dogQ.empty() && !m_catQ.empty())
            {//时间戳小的先进队列
-               if(this->dogQ.front().getCount() < this->catQ.front().getCount())
-                   this->dogQ.front();
+               if(m_dogQ.front().getCount() < m_catQ.front().getCount())
+               {
+                  // Pet pet = m_dogQ.front().getPet();
+                   return m_dogQ.front().getPet();
+               }
                else
-                   this->catQ.front();
+                   return m_catQ.front().getPet();
            }//下面的两个条件是对上面条件的补充
-           else if(!this->dogQ.empty())
-               this->dogQ.front();
-           else if(!this->catQ.empty())
-               this->catQ.front();
+           else if(!m_dogQ.empty())
+               return m_dogQ.front().getPet();
+           else if(!m_catQ.empty())
+               return m_catQ.front().getPet();
          //  else
            //    return;      //异常
         }
         //dog实例出队
         void pollDog()
         {
-            if(!this->dogQ.empty())
-                this->dogQ.pop();
+            if(!m_dogQ.empty())
+                m_dogQ.pop();
             else
                 return;
         }
         //dog队列队首元素
         Pet frontDog()
         {
-            if(!this->dogQ.empty())
-                this->dogQ.front();
+            if(!m_dogQ.empty())
+                return m_dogQ.front().getPet();
         //  else
           //    return;
         }
         
         void pollCat()
         {
-            if(!this->catQ.empty())
-                this->catQ.pop();
+            if(!m_catQ.empty())
+                m_catQ.pop();
             else
                 return;
         }
 
         Pet frontCat()
         {
-            if(!this->catQ.empty())
-                this->catQ.front();
+            if(!m_catQ.empty())
+                return m_catQ.front().getPet();
         //  else
           //    return;
         }
         //整个队列是否是为空
         bool isEmpty()
         {
-            return this->dogQ.empty() && this->catQ.empty();
+            return m_dogQ.empty() && m_catQ.empty();
         }
         bool isDogQueueEmpty()
         {
-            return this->dogQ.empty();
+            return m_dogQ.empty();
         }
         bool isCatQueueEmpty()
         {
-            return this->catQ.empty();
+            return m_catQ.empty();
         }
 };
 int main(void)
